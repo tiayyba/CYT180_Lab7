@@ -34,6 +34,57 @@ By the end of this lab you will be able to:
 
 ----
 
+## Data Preprocessing vs. Exploratory Data Analysis (EDA)
+Before starting Step 1, it is important to understand the difference between Data Preprocessing and Exploratory Data Analysis (EDA). Although related, they serve different roles in the machine-learning workflow.
+
+### What Is Data Preprocessing?
+
+Data preprocessing involves preparing raw data so it is clean, consistent, and ready for modeling.
+
+**Key Characteristics**
+- Improves data quality  
+- Corrects structural issues  
+- Ensures machine-learning algorithms can interpret the data  
+- Handles inconsistencies and noise  
+
+**Typical Preprocessing Tasks**
+- Handling missing values  
+- Treating or removing outliers  
+- Fixing incorrect data types  
+- Encoding categorical variables  
+- Normalizing or standardizing values  
+- Removing duplicates  
+- Selecting or filtering features
+
+### What Is Exploratory Data Analysis (EDA)?
+
+Exploratory Data Analysis (EDA) focuses on understanding the dataset and uncovering patterns.
+
+**Key Characteristics**
+- Examines trends and distributions  
+- Identifies relationships between variables  
+- Detects anomalies or unexpected behavior  
+- Helps guide preprocessing and modeling decisions  
+
+**Typical EDA Tasks**
+- Summary statistics (mean, median, quartiles)  
+- Distribution visualizations  
+- Correlation analysis  
+- Checking class balance  
+- Observing dataset structure and behavior  
+
+#### How They Work Together
+
+| Data Preprocessing | Exploratory Data Analysis (EDA) |
+|--------------------|-----------------------------------|
+| Prepares and cleans data | Helps you understand the data |
+| Fixes problems | Reveals patterns and issues |
+| Ensures data is model-ready | Guides preprocessing choices |
+| Structured steps | Open-ended investigation |
+
+
+----
+
 ## Section 1 — Import Libraries & Load Dataset
 Before cleaning, analyzing, or modeling, confirm the dataset loads correctly, columns appear as expected, and no immediate formatting issues exist. This prevents downstream errors and saves time. Lets set up your Python environment and load the dataset to begin preprocessing and EDA.
 
