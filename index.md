@@ -35,7 +35,7 @@ By the end of this lab you will be able to:
 ----
 
 ## Data Preprocessing vs. Exploratory Data Analysis (EDA)
-Before starting Step 1, it is important to understand the difference between Data Preprocessing and Exploratory Data Analysis (EDA). Although related, they serve different roles in the machine-learning workflow.
+Before swe get started, it is important to understand the difference between Data Preprocessing and Exploratory Data Analysis (EDA). Although related, they serve different roles in the machine-learning workflow.
 
 ### What Is Data Preprocessing?
 
