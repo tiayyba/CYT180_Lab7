@@ -75,13 +75,15 @@ Exploratory Data Analysis (EDA) focuses on understanding the dataset and uncover
 
 #### How They Work Together
 
-| Data Preprocessing | Exploratory Data Analysis (EDA) |
-|--------------------|-----------------------------------|
-| Prepares and cleans data | Helps you understand the data |
-| Fixes problems | Reveals patterns and issues |
-| Ensures data is model-ready | Guides preprocessing choices |
-| Structured steps | Open-ended investigation |
+A typical ML workflow alternates between the two:
 
+1. Perform EDA → discover outliers
+2. Preprocess → remove or adjust outliers
+3. EDA again → verify the effect
+4. Preprocess → scale features
+5. EDA again → check distribution changes
+
+It’s an iterative loop, not a single pass.
 
 ----
 
