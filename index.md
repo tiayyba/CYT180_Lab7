@@ -123,7 +123,43 @@ Inspect the dataset’s structure and identify missing values before performing 
 Identifying missing values early helps determine whether to remove rows, impute values, or engineer alternative solutions.
 
 ```python
-df.info() # Number of rows and columns, Data Typles, How many non-null entries each column contains
+df.info() # number of rows and columns, Data Typles, How many non-null entries each column contains
 df.isnull().sum()  # count of missing values per column
-
+```
 ----
+
+## Section 3: Statistical Summary and Outlier Visualization
+Before performing any cleaning or transformations, it is important to understand how each numeric feature (column) is distributed. This section provides two key tools for this:
+- **descriptive statistics**, which summarize the central tendency and spread of each feature
+- **boxplots**, which help visually detect potential outliers.
+Descriptive statistics confirm whether feature values fall within expected ranges. Visualizing outliers helps avoid distortions during scaling (Step 8) or model training
+
+
+```python
+summary = df.describe()  # count, mean, std, min, 25%, 50%, 75%, max
+print(summary)
+
+import matplotlib.pyplot as plt
+num_cols = df.select_dtypes(include=["number"]).columns
+fig, axs = plt.subplots(len(num_cols), 1, figsize=(7, 1.8 * len(num_cols)), constrained_layout=True)
+if len(num_cols) == 1:
+    axs = [axs]  # ensure iterable
+
+for ax, col in zip(axs, num_cols):
+    ax.boxplot(df[col], vert=False)
+    ax.set_ylabel(col)
+    ax.set_xlabel("Value")
+    ax.set_title(f"Boxplot: {col}")
+
+plt.show()
+```
+**Explanation**
+
+- **df.describe()** provides a quick summary of each numeric column, including the mean, median (50%), quartiles, and spread.
+- Boxplots highlight the distribution shape, central value, and any values beyond the typical 1.5 × IQR boundary.
+- This step helps identify skew, inconsistent scales, and potential outliers before deciding whether to remove or transform them.
+
+**Reflection Questions**
+- Why might boxplots reveal outliers more effectively than numerical summaries alone?
+- Should all outliers be removed automatically, or should the decision depend on domain context?
+- How might skewed distributions influence future preprocessing steps?
