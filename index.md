@@ -111,3 +111,19 @@ df.head() # previews the first 5 rows to verify structure and column names.
 - **seaborn (sns) & matplotlib (plt):** Plotting and statistical visualization.
 
 ----
+
+## Section 2: Inspect Structure and Check Missing Values
+
+Inspect the dataset’s structure and identify missing values before performing any transformations.Missing or inconsistent data can:
+
+- Distort statistical summaries
+- Break machine-learning models
+- Lead to incorrect conclusions
+
+Identifying missing values early helps determine whether to remove rows, impute values, or engineer alternative solutions.
+
+```python
+df.info() # Number of rows and columns, Data Typles, How many non-null entries each column contains
+df.isnull().sum()  # count of missing values per column
+
+----
