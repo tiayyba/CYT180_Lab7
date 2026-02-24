@@ -276,7 +276,8 @@ From this, we can reason:
 
 ----
 ## Section 6: Visualize Target Variable Distribution
-Before training any machine-learning model, it is important to understand how balanced or imbalanced the target variable is. Class distribution affects model performance, fairness, and evaluation metrics. Many algorithms assume roughly balanced classes, and if one class is significantly underrepresented, the model may learn to favor the majority class. This section visualizes the frequency of each class in the dataset to inform decisions about resampling or using class‑balanced algorithms later.
+Before training any machine-learning model, it is important to understand how balanced or imbalanced the target variable is. Class distribution affects model performance, fairness, and evaluation metrics. Many algorithms assume roughly balance classes, and if one class is significantly underrepresented, the model may learn to favor the majority class. This section visualizes the frequency of each class in the dataset to inform decisions about resampling or using class‑balanced algorithms later.
+
 ```python
 import matplotlib.pyplot as plt
 
@@ -299,3 +300,141 @@ plt.show()
 - `value_counts()` counts how many samples belong to each class (0 vs. 1 in the diabetes dataset).
 - A pie chart visually shows the proportion of each category.
 - This visualization makes it easy to determine whether one class dominates the dataset.
+  
+### Why This Step Matters
+
+- **Understanding Class Imbalance:** If one class greatly outweighs the other, the model may default to predicting the majority class. If 80% of samples are class 0 and 20% are class 1, a model that always predicts 0 will appear to be “80% accurate” while completely failing to detect class 1.
+- **Planning for Resampling Techniques**
+  - Oversampling (e.g., SMOTE)
+  - Undersampling
+  - Class-weighted algorithms
+- **Identifying Evaluation Challenges:** With imbalance, metrics like precision, recall, F1-score, and ROC-AUC become more meaningful than accuracy.
+- **Ensuring Fairness and Reliability:** In cybersecurity, minority classes often represent the most critical events (e.g., intrusion attempts). Even if rare, missing them would have serious consequences.
+
+A roughly even distribution suggests the dataset is balanced and simpler to model. A skewed distribution (e.g., 90/10 or 70/30) indicates the need for special handling. It is important to always check both percentages and absolute counts.
+
+In this lab, we only visualize class imbalance. We do not apply balancing techniques yet because oversampling or undersampling must be performed after train–test splitting to avoid data leakage. Class balancing will be handled in next Lab during model training.
+
+### Reflection Questions
+- Based on the pie chart, what percentage of the samples belong to class 0 (No Diabetes) and class 1 (Diabetes)?  
+- Why is accuracy not a reliable metric when the dataset is moderately imbalanced?
+- Why are we only visualizing class imbalance in this lab and not applying balancing techniques yet?
+- In cybersecurity datasets, why are low-frequency (minority) events—such as intrusion attempts or failed login spikes—often the most important to detect?
+
+----
+
+## Section 7: Visualize Target Variable Distribution
+Before training a machine-learning model, it is necessary to split the dataset into two components:  
+- **X**: all predictor variables (the inputs)  
+- **y**: the target variable (the output we want to predict)  
+
+This separation ensures that models learn patterns only from the predictors and that the target variable is not accidentally included in the training data. Including the target variable inside X would make the model “learn” using information it should not have access to, leading to unrealistically high accuracy. Including the target variable inside X would make the model “learn” using information it should not have access to, leading to unrealistically high accuracy. Almost all machine‑learning workflows use this structure.
+
+
+```python
+# Separate predictors and target
+X = df.drop(columns=["Outcome"])
+y = df["Outcome"]
+
+print("Shape of X:", X.shape)
+print("Shape of y:", y.shape)
+```
+
+### Explanation
+
+- X contains all input features except the target.
+- y contains only the target column (Outcome), where:
+  - 0 = No Diabetes
+  - 1 = Diabetes
+- This separation is required for model training, scaling, and evaluation steps.
+- Using .drop() ensures no accidental inclusion of the target in the feature set.
+
+### Reflection Questions
+- What problems might occur if the target column is accidentally included in X?
+- In a cybersecurity scenario, what could X and y represent?
+
+----
+
+## Section 8: Feature Scaling (Normalization and Standardization)
+Machine-learning algorithms often assume that all features operate on comparable numerical scales. When features vary widely in range, models that rely on distance, gradient calculations, or optimization can behave unpredictably. Feature scaling transforms all predictors into a consistent range or distribution, improving training stability and model performance. In this step, you will apply two common scaling techniques: Min‑Max Normalization and Standardization.
+
+```python
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
+
+# 1) Min-Max Normalization (scales features to range 0–1)
+minmax_scaler = MinMaxScaler()
+X_normalized = minmax_scaler.fit_transform(X)
+
+# 2) Standardization (mean = 0, standard deviation = 1)
+standard_scaler = StandardScaler()
+X_standardized = standard_scaler.fit_transform(X)
+
+print("Shape of normalized X:", X_normalized.shape)
+print("Shape of standardized X:", X_standardized.shape)
+```
+
+### Explanation
+
+- Min‑Max Normalization
+  - Rescales values to a fixed range (typically 0–1).
+  - Useful when the feature distribution is not assumed to be normal.
+  - Sensitive to outliers, which is why outlier removal (Step 4) is done beforehand.
+- Standardization (Z‑Score Scaling)
+  - Centers data around mean 0 with standard deviation 1.
+  - Preferred for algorithms that assume normally distributed data or use gradient‑based optimization.
+ 
+
+Without scaling, a feature like “Glucose” (0–200) can overpower a feature like “Pregnancies” (0–15), skewing model behavior. Imagine two features:
+- Glucose values range from 50 to 200
+- SkinThickness values range from 5 to 50
+If unscaled, a model may treat changes in Glucose as far more significant than changes in SkinThickness simply because the raw numbers are larger. After scaling, both features contribute proportionally to the model.
+Many algorithms expect scaled input for optimal performance, including:
+  - Logistic Regression
+  - k‑Nearest Neighbors
+  - Neural Networks
+  - PCA
+  
+
+### Reflection Questions
+- Why must scaling be applied after separating X and y?
+
+----
+
+## Conclusion
+
+In this lab, you completed the full preprocessing and exploratory data analysis workflow required to prepare a structured dataset for machine learning. You examined the dataset’s structure, identified missing values, explored statistical summaries, visualized outliers, applied the IQR method, analyzed feature correlations, inspected class balance, separated predictors from the target variable, and scaled the features.
+
+These steps ensure the data is clean, consistent, and ready for modeling. By the end of this lab, you should understand not only how to perform these tasks, but also why each step matters in building reliable and interpretable machine‑learning models. This foundation is essential before moving into model training, evaluation, and prediction.
+
+Your dataset is now fully preprocessed and ready for **Lab 8**, where you will perform:
+
+- Train–test splitting  
+- Model selection  
+- Model training  
+- Model evaluation and reporting  
+- Interpretation of performance metrics  
+
+Having clean and well‑prepared data will make the modeling process in Lab 8 far more effective and meaningful.
+
+## Submission Instructions
+- Record a 3 minutes video where you show your notebook and explain your preprocessing and EDA verbally.
+- The video must include these four checkpoints in order:
+- **Checkpoint A — Dataset Loading and Initial Inspection: Section 1 – Section 2 (≤ 30 seconds)**
+  -Show how you imported the required libraries, loaded the dataset, and used commands like `df.head()`, `df.info()`, and `df.isnull().sum()` to confirm the structure and identify any missing values.
+- **Checkpoint B — Descriptive Statistics and Outlier Visualization: Section 3 – Section 4  (≤ 60 seconds)**
+  - Explain how you generated summary statistics with `df.describe()` and used boxplots to visually detect potential outliers. Briefly describe what patterns or anomalies you observed
+- **Checkpoint C — Correlation Analysis and Class Distribution: Section 5 – Section 6 (≤ 30 seconds)**
+  - Show your correlation heatmap and discuss any strongly related features. Then present your class distribution visualization and comment on the imbalance (approximately 65% vs 35%) and why balancing is not performed in this lab.
+- **Checkpoint D — Feature/Target Separation and Scaling: Section 7 – Section 8  (≤ 30 seconds)**
+  - Demonstrate how you separated the dataset into **X** (features) and **y** (target). Then show the scaling step (Min‑Max or Standardization) and briefly explain why scaling is important before model training.
+      
+----
+
+## Video Requirements
+
+- Max length: 2 minutes 30 seconds (absolute max 3 minutes; over 3 minutes = 0 marks for the lab)
+- Screen share showing your notebook
+- Voice narration required along with camera on
+- One continuous video capture (no editing)
+- Submit as: Unlisted YouTube link
+- Paste your video link: in the Blackboard Lab 7 submission
