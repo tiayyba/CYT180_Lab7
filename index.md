@@ -156,7 +156,8 @@ In some domains, outliers may represent true rare behavior; in others, they may 
 One common and transparent approach is the Interquartile Range (IQR) method. This method uses statistical boundaries to identify values that fall far outside the typical range of the data. Outlier removal can improve model stability, especially when extreme values distort the scale or distribution of a feature.
 
 ```python
-# we are using numpy library here
+import numpy as np
+
 # Example: Removing outliers from the "Insulin" column using the IQR method
 q1, q3 = np.percentile(df["Insulin"].dropna(), [25, 75])
 iqr = q3 - q1
