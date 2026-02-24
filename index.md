@@ -131,7 +131,7 @@ df.isnull().sum()  # count of missing values per column
 ## Section 3: Statistical Summary and Outlier Visualization
 Before performing any cleaning or transformations, it is important to understand how each numeric feature (column) is distributed. This section provides two key tools for this:
 - **descriptive statistics:** which summarize the central tendency and spread of each feature
-- **boxplots:** which help visually detect potential outliers.
+- **boxplots:** which help visually detect potential outliers
 
 Descriptive statistics confirm whether feature values fall within expected ranges. Visualizing outliers helps avoid distortions during scaling (Step 8) or model training
 
