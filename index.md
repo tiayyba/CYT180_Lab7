@@ -52,13 +52,7 @@ Data preprocessing involves preparing raw data so it is clean, consistent, and r
 
 ### What Is Exploratory Data Analysis (EDA)?
 
-Exploratory Data Analysis (EDA) focuses on understanding the dataset and uncovering patterns.
-
-#### Key Characteristics
-- Examines trends and distributions  
-- Identifies relationships between variables  
-- Detects anomalies or unexpected behavior  
-- Helps guide preprocessing and modeling decisions  
+Exploratory Data Analysis (EDA) focuses on understanding the dataset and uncovering patterns. This process examines trends and distributions, identifies relationships between variables, detects anomalies or unexpected behavior, and helps guide preprocessing and modeling decisions.
 
 #### Typical EDA Tasks
 - Summary statistics (mean, median, quartiles)  
