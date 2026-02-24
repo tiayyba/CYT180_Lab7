@@ -73,7 +73,7 @@ Exploratory Data Analysis (EDA) focuses on understanding the dataset and uncover
 - Checking class balance  
 - Observing dataset structure and behavior  
 
-#### How They Work Together
+### How They Work Together
 
 A typical ML workflow alternates between the two:
 
