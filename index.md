@@ -214,15 +214,15 @@ plt.show()
   - -1.0 (strong negative relationship)
 - The heatmap color‑codes these relationships, making it easier to spot strong associations.
 
-### Why This Step Matters
-- Identifying Redundant Features: Highly correlated features often provide overlapping information. Including both in a model can add noise or reduce efficiency without improving accuracy. Feature selection often starts with correlation inspection.
-- Understanding Feature Influence on the Target: A feature strongly correlated with the target variable is a good candidate for inclusion in a predictive model. Conversely, features with almost no correlation may be less useful or require transformation.
-- Detecting Multicollinearity Before Modeling: In models such as logistic regression, linear regression, or any model relying on coefficients, multicollinearity (when predictors are strongly correlated with each other) weakens model reliability. Correlation analysis helps you detect and address this early.
-- **Supporting Feature Engineering:** Correlations can reveal hidden relationships that guide decisions such as:
+### Why Correlation Analysis is Required
+- **Identifying Redundant Features:** highly correlated features often provide overlapping information. Including both in a model can add noise or reduce efficiency without improving accuracy. Feature selection often starts with correlation inspection.
+- **Understanding Feature Influence on the Target:** a feature strongly correlated with the target variable is a good candidate for inclusion in a predictive model. Conversely, features with almost no correlation may be less useful or require transformation.
+- **Detecting Multicollinearity Before Modeling:** in models such as logistic regression, linear regression, or any model relying on coefficients, multicollinearity (when predictors are strongly correlated with each other) weakens model reliability. Correlation analysis helps you detect and address this early.
+- **Supporting Feature Engineering:** correlations can reveal hidden relationships that guide decisions such as:
    - combining features
    - removing irrelevant fields
    - applying transformations
-- **Providing Insight Into Data Structure:** Before doing any modeling, analysts should understand how their variables interact. Correlation analysis provides a quick, evidence‑based overview of the dataset’s structure.
+- **Providing Insight Into Data Structure:** before doing any modeling, analysts should understand how their variables interact. Correlation analysis provides a quick, evidence‑based overview of the dataset’s structure.
 
 ### Example: Identifying Redundant Features
 
