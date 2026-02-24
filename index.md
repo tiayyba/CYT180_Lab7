@@ -39,7 +39,7 @@ Before we get started, it is important to understand the difference between Data
 
 ### What Is Data Preprocessing?
 
-Data preprocessing involves preparing raw data so it is clean, consistent, and ready for modeling. It improves data quality, corrects structural issues, ensures machine-learning algorithms can interpret the data by handling inconsistencies and noise.
+Data preprocessing involves preparing raw data so it is clean, consistent, and ready for modeling. It improves data quality, corrects structural issues, handle inconsistencies and noise to ensures that machine-learning algorithms can interpret the data.
 
 #### Typical Preprocessing Tasks
 - Handling missing values  
