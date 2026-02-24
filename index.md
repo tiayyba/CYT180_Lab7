@@ -282,7 +282,7 @@ plt.show()
 - A pie chart visually shows the proportion of each category.
 - This visualization makes it easy to determine whether one class dominates the dataset.
   
-### Why This Step Matters
+### How does Visualization Help
 
 - **Understanding Class Imbalance:** If one class greatly outweighs the other, the model may default to predicting the majority class. If 80% of samples are class 0 and 20% are class 1, a model that always predicts 0 will appear to be “80% accurate” while completely failing to detect class 1.
 - **Planning for Resampling Techniques**
