@@ -234,21 +234,11 @@ plt.show()
 - The heatmap color‑codes these relationships, making it easier to spot strong associations.
 
 ### Why This Step Matters (Key Rationale)
-
-**1. **Identifying Redundant Features****
-Highly correlated features often provide overlapping information. Including both in a model can add noise or reduce efficiency without improving accuracy. Feature selection often starts with correlation inspection.
-**2. Understanding Feature Influence on the Target**
-A feature strongly correlated with the target variable is a good candidate for inclusion in a predictive model. Conversely, features with almost no correlation may be less useful or require transformation.
-
-
-**3. Detecting Multicollinearity Before Modeling**
-In models such as logistic regression, linear regression, or any model relying on coefficients, multicollinearity (when predictors are strongly correlated with each other) weakens model reliability. Correlation analysis helps you detect and address this early.
-
-**4. Supporting Feature Engineering**
-Correlations can reveal hidden relationships that guide decisions such as:
-- combining features
-- removing irrelevant fields
-- applying transformations
-
-**5. Providing Insight Into Data Structure**
-Before doing any modeling, analysts should understand how their variables interact. Correlation analysis provides a quick, evidence‑based overview of the dataset’s structure.
+1. **Identifying Redundant Features:** Highly correlated features often provide overlapping information. Including both in a model can add noise or reduce efficiency without improving accuracy. Feature selection often starts with correlation inspection.
+2. **Understanding Feature Influence on the Target:** A feature strongly correlated with the target variable is a good candidate for inclusion in a predictive model. Conversely, features with almost no correlation may be less useful or require transformation.
+3. **Detecting Multicollinearity Before Modeling:** In models such as logistic regression, linear regression, or any model relying on coefficients, multicollinearity (when predictors are strongly correlated with each other) weakens model reliability. Correlation analysis helps you detect and address this early.
+4. **Supporting Feature Engineering:** Correlations can reveal hidden relationships that guide decisions such as:
+   - combining features
+  - removing irrelevant fields
+  - applying transformations
+5. **Providing Insight Into Data Structure:** Before doing any modeling, analysts should understand how their variables interact. Correlation analysis provides a quick, evidence‑based overview of the dataset’s structure.
