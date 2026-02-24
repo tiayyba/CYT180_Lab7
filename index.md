@@ -56,6 +56,8 @@ Data preprocessing involves preparing raw data so it is clean, consistent, and r
 - Removing duplicates  
 - Selecting or filtering features
 
+---
+
 ### What Is Exploratory Data Analysis (EDA)?
 
 Exploratory Data Analysis (EDA) focuses on understanding the dataset and uncovering patterns.
