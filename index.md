@@ -160,7 +160,7 @@ plt.show()
 - Boxplots highlight the distribution shape, central value, and any values beyond the typical 1.5 × IQR boundary.
 - This step helps identify skew, inconsistent scales, and potential outliers before deciding whether to remove or transform them.
 
-**Reflection Questions**
+### Reflection Questions
 - Why might boxplots reveal outliers more effectively than numerical summaries alone?
 - Should all outliers be removed automatically, or should the decision depend on domain context?
 - How might skewed distributions influence future preprocessing steps?
