@@ -273,3 +273,29 @@ From this, we can reason:
 - Why might two variables be strongly correlated even if one does not directly cause the other?
 - What issues might arise if two features have a correlation greater than 0.9?
 - How can correlation analysis inform feature selection?
+
+----
+## Section 6: Visualize Target Variable Distribution
+Before training any machine-learning model, it is important to understand how balanced or imbalanced the target variable is. Class distribution affects model performance, fairness, and evaluation metrics. Many algorithms assume roughly balanced classes, and if one class is significantly underrepresented, the model may learn to favor the majority class. This section visualizes the frequency of each class in the dataset to inform decisions about resampling or using class‑balanced algorithms later.
+```python
+import matplotlib.pyplot as plt
+
+# Count values in the target column
+counts = df["Outcome"].value_counts()
+
+# Pie chart representation
+plt.figure(figsize=(6, 6))
+plt.pie(
+    counts,
+    labels=counts.index,
+    autopct="%.0f%%",
+    shadow=True
+)
+plt.title("Outcome Distribution")
+plt.show()
+```
+### Explanation
+
+- `value_counts()` counts how many samples belong to each class (0 vs. 1 in the diabetes dataset).
+- A pie chart visually shows the proportion of each category.
+- This visualization makes it easy to determine whether one class dominates the dataset.
