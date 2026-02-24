@@ -17,7 +17,7 @@ In cybersecurity, poorly preprocessed data can lead to:
 - Broken models due to missing values
 - Incorrect assumptions about normal vs malicious behavior
 
-This lab guides you through the full preprocessing pipeline from loading the data up to scaling, ensuring that you have a clean, trustworthy dataset ready for modeling in next lab.
+This lab guides you through the full preprocessing pipeline from loading data to scaling, ensuring that you have a clean, trustworthy dataset ready for modeling in next lab.
 
 ----
 
@@ -35,7 +35,7 @@ By the end of this lab you will be able to:
 ----
 
 ## Data Preprocessing vs. Exploratory Data Analysis (EDA)
-Before swe get started, it is important to understand the difference between Data Preprocessing and Exploratory Data Analysis (EDA). Although related, they serve different roles in the machine-learning workflow.
+Before we get started, it is important to understand the difference between Data Preprocessing and Exploratory Data Analysis (EDA). Although related, they serve different roles in the machine-learning workflow.
 
 ### What Is Data Preprocessing?
 
@@ -81,14 +81,13 @@ A typical ML workflow alternates between the two:
 2. Preprocess → remove or adjust outliers
 3. EDA again → verify the effect
 4. Preprocess → scale features
-5. EDA again → check distribution changes
 
 It’s an iterative loop, not a single pass.
 
 ----
 
 ## Section 1 — Import Libraries & Load Dataset
-Before cleaning, analyzing, or modeling, confirm the dataset loads correctly, columns appear as expected, and no immediate formatting issues exist. This prevents downstream errors and saves time. Lets set up your Python environment and load the dataset to begin preprocessing and EDA.
+Before cleaning, analyzing, or modeling, confirm the dataset loads correctly, columns appear as expected, and no immediate formatting issues exist. This prevents downstream errors and saves time. Let's set up your Python environment and load the dataset to begin preprocessing and EDA.
 
 ```python
 import pandas as pd
@@ -114,7 +113,7 @@ df.head() # previews the first 5 rows to verify structure and column names.
 
 ## Section 2: Inspect Structure and Check Missing Values
 
-Inspect the dataset’s structure and identify missing values before performing any transformations.Missing or inconsistent data can:
+Inspect the dataset’s structure and identify missing values before performing any transformations. Missing or inconsistent data can:
 
 - Distort statistical summaries
 - Break machine-learning models
@@ -123,7 +122,7 @@ Inspect the dataset’s structure and identify missing values before performing 
 Identifying missing values early helps determine whether to remove rows, impute values, or engineer alternative solutions.
 
 ```python
-df.info() # number of rows and columns, Data Typles, How many non-null entries each column contains
+df.info() # number of rows and columns, data types, how many non-null entries each column contains
 df.isnull().sum()  # count of missing values per column
 ```
 ----
@@ -230,7 +229,7 @@ plt.show()
 - Correlation values range from:
   - +1.0 (strong positive relationship)
   - 0 (no linear relationship)
-  - 1.0 (strong negative relationship)
+  - -1.0 (strong negative relationship)
 - The heatmap color‑codes these relationships, making it easier to spot strong associations.
 
 ### Why This Step Matters
@@ -239,8 +238,8 @@ plt.show()
 - Detecting Multicollinearity Before Modeling: In models such as logistic regression, linear regression, or any model relying on coefficients, multicollinearity (when predictors are strongly correlated with each other) weakens model reliability. Correlation analysis helps you detect and address this early.
 - **Supporting Feature Engineering:** Correlations can reveal hidden relationships that guide decisions such as:
    - combining features
-    - removing irrelevant fields
-    - applying transformations
+   - removing irrelevant fields
+   - applying transformations
 - **Providing Insight Into Data Structure:** Before doing any modeling, analysts should understand how their variables interact. Correlation analysis provides a quick, evidence‑based overview of the dataset’s structure.
 
 ### Example: Identifying Redundant Features
@@ -323,7 +322,7 @@ In this lab, we only visualize class imbalance. We do not apply balancing techni
 
 ----
 
-## Section 7: Visualize Target Variable Distribution
+## Section 7: Separate Features and Target
 Before training a machine-learning model, it is necessary to split the dataset into two components:  
 - **X**: all predictor variables (the inputs)  
 - **y**: the target variable (the output we want to predict)  
@@ -406,7 +405,7 @@ In this lab, you completed the full preprocessing and exploratory data analysis 
 
 These steps ensure the data is clean, consistent, and ready for modeling. By the end of this lab, you should understand not only how to perform these tasks, but also why each step matters in building reliable and interpretable machine‑learning models. This foundation is essential before moving into model training, evaluation, and prediction.
 
-Your dataset is now fully preprocessed and ready for **Lab 8**, where you will perform:
+Your dataset is now fully preprocessed and ready for next **Lab 8**, where you will perform:
 
 - Train–test splitting  
 - Model selection  
@@ -417,10 +416,10 @@ Your dataset is now fully preprocessed and ready for **Lab 8**, where you will p
 Having clean and well‑prepared data will make the modeling process in Lab 8 far more effective and meaningful.
 
 ## Submission Instructions
-- Record a 3 minutes video where you show your notebook and explain your preprocessing and EDA verbally.
+- Record a 3-minutes video where you show your notebook and explain your preprocessing and EDA verbally.
 - The video must include these four checkpoints in order:
 - **Checkpoint A — Dataset Loading and Initial Inspection: Section 1 – Section 2 (≤ 30 seconds)**
-  -Show how you imported the required libraries, loaded the dataset, and used commands like `df.head()`, `df.info()`, and `df.isnull().sum()` to confirm the structure and identify any missing values.
+  - Show how you imported the required libraries, loaded the dataset, and used commands like `df.head()`, `df.info()`, and `df.isnull().sum()` to confirm the structure and identify any missing values.
 - **Checkpoint B — Descriptive Statistics and Outlier Visualization: Section 3 – Section 4  (≤ 60 seconds)**
   - Explain how you generated summary statistics with `df.describe()` and used boxplots to visually detect potential outliers. Briefly describe what patterns or anomalies you observed
 - **Checkpoint C — Correlation Analysis and Class Distribution: Section 5 – Section 6 (≤ 45 seconds)**
