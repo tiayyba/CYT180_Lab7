@@ -207,3 +207,20 @@ In cybersecurity datasets, some outliers may represent meaningful anomalies rath
 - How might removing outliers affect the distribution of a feature?
 
 ----
+
+## Section 5: Correlation Analysis
+Correlation analysis helps determine how strongly different features relate to one another. Before building any machine‑learning model, it is important to understand which variables move together, which are unrelated, and which may be redundant. This step provides a structured way to evaluate feature relationships based on numerical evidence. For many models, especially linear models and distance‑based algorithms, correlation patterns directly influence performance and interpretability.
+
+```python
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Compute correlation matrix for numeric columns
+corr = df.corr(numeric_only=True)
+
+# Plot heatmap
+plt.figure(figsize=(10, 8))
+sns.heatmap(corr, annot=True, cmap="coolwarm", fmt=".2f")
+plt.title("Correlation Matrix")
+plt.show()
+```
