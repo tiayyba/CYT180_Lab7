@@ -243,6 +243,30 @@ plt.show()
     - applying transformations
 - **Providing Insight Into Data Structure:** Before doing any modeling, analysts should understand how their variables interact. Correlation analysis provides a quick, evidence‑based overview of the dataset’s structure.
 
+**Example: Identifying Redundant Features**
+Suppose the correlation matrix shows the following relationships:
+
+- Glucose and Insulin have a correlation of **0.82**
+- BMI and SkinThickness have a correlation of **0.78**
+- Age and Pregnancies have a correlation of **0.20**
+
+From this, we can reason:
+
+1. **Glucose and Insulin (~0.82 correlation)**  
+   These two features move strongly together. Including both may add little additional information to the model.  
+   A common approach:
+   - Keep the feature with fewer missing values.
+   - Or keep the one that shows a stronger correlation with the target (Outcome).
+
+2. **BMI and SkinThickness (~0.78 correlation)**  
+   These are moderately high and could introduce redundancy.  
+   You might:
+   - Retain both if a nonlinear model (e.g., Random Forest) is used.
+   - Drop one if using a model sensitive to multicollinearity (e.g., Logistic Regression).
+
+3. **Age and Pregnancies (~0.20 correlation)**  
+   Low correlation means no redundancy. Both features capture different information and should be kept.
+
 **Reflection Questions**
 
 - Why might two variables be strongly correlated even if one does not directly cause the other?
