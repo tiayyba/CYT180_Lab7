@@ -41,13 +41,13 @@ Before swe get started, it is important to understand the difference between Dat
 
 Data preprocessing involves preparing raw data so it is clean, consistent, and ready for modeling.
 
-**Key Characteristics**
+#### Key Characteristics
 - Improves data quality  
 - Corrects structural issues  
 - Ensures machine-learning algorithms can interpret the data  
 - Handles inconsistencies and noise  
 
-**Typical Preprocessing Tasks**
+#### Typical Preprocessing Tasks
 - Handling missing values  
 - Treating or removing outliers  
 - Fixing incorrect data types  
