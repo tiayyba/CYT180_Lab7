@@ -56,8 +56,6 @@ Data preprocessing involves preparing raw data so it is clean, consistent, and r
 - Removing duplicates  
 - Selecting or filtering features
 
----
-
 ### What Is Exploratory Data Analysis (EDA)?
 
 Exploratory Data Analysis (EDA) focuses on understanding the dataset and uncovering patterns.
@@ -156,7 +154,7 @@ for ax, col in zip(axs, num_cols):
 
 plt.show()
 ```
-**Explanation**
+### Explanation
 
 - **df.describe()** provides a quick summary of each numeric column, including the mean, median (50%), quartiles, and spread.
 - Boxplots highlight the distribution shape, central value, and any values beyond the typical 1.5 × IQR boundary.
@@ -192,7 +190,7 @@ print("Original rows:", len(df))
 print("Rows after removing Insulin outliers:", len(clean_df))
 ```
 
-**Explanation**
+### Explanation
 
 - The first quartile `(Q1)` and third quartile `(Q3)` define the middle 50 percent of the data.
 - The Interquartile Range `(IQR)` is computed as `Q3 minus Q1`.
@@ -202,7 +200,7 @@ print("Rows after removing Insulin outliers:", len(clean_df))
 Clinical datasets (such as this diabetes dataset) may contain zeros or unusually high values that indicate missing or irregular entries.
 In cybersecurity datasets, some outliers may represent meaningful anomalies rather than noise. These should be evaluated carefully before removal.
 
-**Reflection Questions**
+### Reflection Questions
 
 - Why is 1.5 × IQR used as a standard boundary rather than 1 × IQR or 2 × IQR?
 - Should all outliers be removed automatically, or should outlier handling depend on the meaning of the data?
@@ -226,7 +224,7 @@ sns.heatmap(corr, annot=True, cmap="coolwarm", fmt=".2f")
 plt.title("Correlation Matrix")
 plt.show()
 ```
-**Explanation**
+### Explanation
 
 - **df.corr()** computes pairwise correlation coefficients between numeric features.
 - Correlation values range from:
@@ -236,16 +234,16 @@ plt.show()
 - The heatmap color‑codes these relationships, making it easier to spot strong associations.
 
 **Why This Step Matters**
-- **Identifying Redundant Features:** Highly correlated features often provide overlapping information. Including both in a model can add noise or reduce efficiency without improving accuracy. Feature selection often starts with correlation inspection.
-- **Understanding Feature Influence on the Target:** A feature strongly correlated with the target variable is a good candidate for inclusion in a predictive model. Conversely, features with almost no correlation may be less useful or require transformation.
-- **Detecting Multicollinearity Before Modeling:** In models such as logistic regression, linear regression, or any model relying on coefficients, multicollinearity (when predictors are strongly correlated with each other) weakens model reliability. Correlation analysis helps you detect and address this early.
+- Identifying Redundant Features: Highly correlated features often provide overlapping information. Including both in a model can add noise or reduce efficiency without improving accuracy. Feature selection often starts with correlation inspection.
+- Understanding Feature Influence on the Target: A feature strongly correlated with the target variable is a good candidate for inclusion in a predictive model. Conversely, features with almost no correlation may be less useful or require transformation.
+- Detecting Multicollinearity Before Modeling: In models such as logistic regression, linear regression, or any model relying on coefficients, multicollinearity (when predictors are strongly correlated with each other) weakens model reliability. Correlation analysis helps you detect and address this early.
 - **Supporting Feature Engineering:** Correlations can reveal hidden relationships that guide decisions such as:
    - combining features
     - removing irrelevant fields
     - applying transformations
 - **Providing Insight Into Data Structure:** Before doing any modeling, analysts should understand how their variables interact. Correlation analysis provides a quick, evidence‑based overview of the dataset’s structure.
 
-**Example: Identifying Redundant Features**
+### Example: Identifying Redundant Features
 
 Suppose the correlation matrix shows the following relationships:
 
@@ -270,7 +268,7 @@ From this, we can reason:
 - **Age and Pregnancies (~0.20 correlation)**  
    Low correlation means no redundancy. Both features capture different information and should be kept.
 
-**Reflection Questions**
+### Reflection Questions
 
 - Why might two variables be strongly correlated even if one does not directly cause the other?
 - What issues might arise if two features have a correlation greater than 0.9?
