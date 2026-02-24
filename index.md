@@ -133,7 +133,7 @@ Before performing any cleaning or transformations, it is important to understand
 - **descriptive statistics:** which summarize the central tendency and spread of each feature
 - **boxplots:** which help visually detect potential outliers
 
-Descriptive statistics confirm whether feature values fall within expected ranges. Visualizing outliers helps avoid distortions during scaling (Step 8) or model training
+Descriptive statistics confirm whether feature values fall within expected ranges. Visualizing outliers helps avoid distortions during scaling or model training.
 
 
 ```python
