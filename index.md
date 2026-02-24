@@ -17,7 +17,7 @@ In cybersecurity, poorly preprocessed data can lead to:
 - Broken models due to missing values
 - Incorrect assumptions about normal vs malicious behavior
 
-This lab guides you through the full preprocessing pipeline from loading data to scaling( data normalization), ensuring that you have a clean, trustworthy dataset ready for modeling in next lab.
+This lab guides you through the full preprocessing pipeline from loading data to scaling (data normalization), ensuring that you have a clean, trustworthy dataset ready for modeling in next lab.
 
 ----
 
