@@ -60,13 +60,13 @@ Data preprocessing involves preparing raw data so it is clean, consistent, and r
 
 Exploratory Data Analysis (EDA) focuses on understanding the dataset and uncovering patterns.
 
-**Key Characteristics**
+#### Key Characteristics
 - Examines trends and distributions  
 - Identifies relationships between variables  
 - Detects anomalies or unexpected behavior  
 - Helps guide preprocessing and modeling decisions  
 
-**Typical EDA Tasks**
+#### Typical EDA Tasks
 - Summary statistics (mean, median, quartiles)  
 - Distribution visualizations  
 - Correlation analysis  
@@ -101,7 +101,7 @@ df = pd.read_csv('diabetes.csv') #  loads the dataset
 df.head() # previews the first 5 rows to verify structure and column names.
 ```
 
-**Explanation**
+### Explanation
 
 - **pandas (pd):** DataFrame operations (load CSVs, filter, group, summarize).
 - **numpy (np):** Numerical utilities (percentiles, array math, element-wise ops).
