@@ -167,7 +167,7 @@ plt.show()
 
 ----
 
-## Section 4: Remove Outliers Using the IQR Method
+## Section 4: Remove Outliers
 
 Extreme values can distort statistical summaries, scaling procedures, and distance‑based algorithms. After identifying potential outliers in Step 3, the next step is to determine whether these values should be removed.  Removing or adjusting outliers helps maintain stable model training.
 In some domains, outliers may represent true rare behavior; in others, they may indicate data entry errors or noise. The decision should always be justified.
