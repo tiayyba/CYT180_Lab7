@@ -423,16 +423,16 @@ Having clean and well‑prepared data will make the modeling process in Lab 8 fa
   -Show how you imported the required libraries, loaded the dataset, and used commands like `df.head()`, `df.info()`, and `df.isnull().sum()` to confirm the structure and identify any missing values.
 - **Checkpoint B — Descriptive Statistics and Outlier Visualization: Section 3 – Section 4  (≤ 60 seconds)**
   - Explain how you generated summary statistics with `df.describe()` and used boxplots to visually detect potential outliers. Briefly describe what patterns or anomalies you observed
-- **Checkpoint C — Correlation Analysis and Class Distribution: Section 5 – Section 6 (≤ 30 seconds)**
+- **Checkpoint C — Correlation Analysis and Class Distribution: Section 5 – Section 6 (≤ 45 seconds)**
   - Show your correlation heatmap and discuss any strongly related features. Then present your class distribution visualization and comment on the imbalance (approximately 65% vs 35%) and why balancing is not performed in this lab.
-- **Checkpoint D — Feature/Target Separation and Scaling: Section 7 – Section 8  (≤ 30 seconds)**
+- **Checkpoint D — Feature/Target Separation and Scaling: Section 7 – Section 8  (≤ 45 seconds)**
   - Demonstrate how you separated the dataset into **X** (features) and **y** (target). Then show the scaling step (Min‑Max or Standardization) and briefly explain why scaling is important before model training.
       
 ----
 
 ## Video Requirements
 
-- Max length: 2 minutes 30 seconds (absolute max 3 minutes; over 3 minutes = 0 marks for the lab)
+- Max length: 3 minutes (over 3 minutes = -20% deduction per minute)
 - Screen share showing your notebook
 - Voice narration required along with camera on
 - One continuous video capture (no editing)
