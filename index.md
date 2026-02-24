@@ -242,3 +242,9 @@ plt.show()
     - removing irrelevant fields
     - applying transformations
 5. **Providing Insight Into Data Structure:** Before doing any modeling, analysts should understand how their variables interact. Correlation analysis provides a quick, evidence‑based overview of the dataset’s structure.
+
+**Reflection Questions**
+
+- Why might two variables be strongly correlated even if one does not directly cause the other?
+- What issues might arise if two features have a correlation greater than 0.9?
+- How can correlation analysis inform feature selection?
