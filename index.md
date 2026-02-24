@@ -127,18 +127,12 @@ Descriptive statistics confirm whether feature values fall within expected range
 summary = df.describe()  # count, mean, std, min, 25%, 50%, 75%, max
 print(summary)
 
-import matplotlib.pyplot as plt
 num_cols = df.select_dtypes(include=["number"]).columns
 fig, axs = plt.subplots(len(num_cols), 1, figsize=(7, 1.8 * len(num_cols)), constrained_layout=True)
-if len(num_cols) == 1:
-    axs = [axs]  # ensure iterable
 
 for ax, col in zip(axs, num_cols):
     ax.boxplot(df[col], vert=False)
     ax.set_ylabel(col)
-    ax.set_xlabel("Value")
-    ax.set_title(f"Boxplot: {col}")
-
 plt.show()
 ```
 ### Explanation
