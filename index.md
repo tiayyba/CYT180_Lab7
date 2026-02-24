@@ -164,3 +164,46 @@ plt.show()
 - Why might boxplots reveal outliers more effectively than numerical summaries alone?
 - Should all outliers be removed automatically, or should the decision depend on domain context?
 - How might skewed distributions influence future preprocessing steps?
+
+----
+
+## Section 4: Remove Outliers Using the IQR Method
+
+Extreme values can distort statistical summaries, scaling procedures, and distance‑based algorithms. After identifying potential outliers in Step 3, the next step is to determine whether these values should be removed.  Removing or adjusting outliers helps maintain stable model training.
+In some domains, outliers may represent true rare behavior; in others, they may indicate data entry errors or noise. The decision should always be justified.
+
+One common and transparent approach is the Interquartile Range (IQR) method. This method uses statistical boundaries to identify values that fall far outside the typical range of the data. Outlier removal can improve model stability, especially when extreme values distort the scale or distribution of a feature.
+
+```python
+import numpy as np
+
+# Example: Removing outliers from the "Insulin" column using the IQR method
+q1, q3 = np.percentile(df["Insulin"].dropna(), [25, 75])
+iqr = q3 - q1
+
+lower_bound = q1 - 1.5 * iqr
+upper_bound = q3 + 1.5 * iqr
+
+clean_df = df[(df["Insulin"] >= lower_bound) & (df["Insulin"] <= upper_bound)]
+
+print("Original rows:", len(df))
+print("Rows after removing Insulin outliers:", len(clean_df))
+```
+
+**Explanation**
+
+- The first quartile `(Q1)` and third quartile `(Q3)` define the middle 50 percent of the data.
+- The Interquartile Range `(IQR)` is computed as `Q3 minus Q1`.
+- Any value below `Q1 − 1.5 × IQR` or above `Q3 + 1.5 × IQR` is considered a potential outlier.
+- This method uses a consistent, reproducible rule and is widely used for skewed or non‑normal data.
+
+Clinical datasets (such as this diabetes dataset) may contain zeros or unusually high values that indicate missing or irregular entries.
+In cybersecurity datasets, some outliers may represent meaningful anomalies rather than noise. These should be evaluated carefully before removal.
+
+**Reflection Questions**
+
+- Why is 1.5 × IQR used as a standard boundary rather than 1 × IQR or 2 × IQR?
+- Should all outliers be removed automatically, or should outlier handling depend on the meaning of the data?
+- How might removing outliers affect the distribution of a feature?
+
+----
