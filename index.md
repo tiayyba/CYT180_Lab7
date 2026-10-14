@@ -1,739 +1,409 @@
-# CYT180 — Lab 7: Joins, Data Cleaning, and Writing Data with PySpark
-
-**Weight:** 3%  
-**Work Type:** Individual  
-**Submission Format:** Screenshots + short written answers  
-
----
-
-##  Introduction
-
-In Lab 6, you installed Spark in Google Colab, created DataFrames, performed common transformations, ran basic Spark SQL, and computed a 7‑day moving average. That workflow focused on working with **one dataset at a time**.
-
-In real Big Data engineering, a typical workflow involves **combining multiple datasets**, cleaning and standardizing them, computing meaningful metrics, and writing the results to efficient formats. These steps form the foundation of a simple ETL (Extract–Transform–Load) workflow.
-In this lab, you will practice three essential skills:
-
-1. Joining multiple DataFrames using the **DataFrame API** and **Spark SQL**
-2. Cleaning: handling missing values and duplicate rows
-3. **Writing results** to disk using CSV and Parquet formats
-
-You will mostly **run provided code** to observe Spark’s behavior and complete a few **simple tasks** in each section.
-
----
-
-##  Learning Objectives
-
-By the end of this lab, you will be able to:
-
-- Perform inner, left, and anti joins in PySpark.
-- Detect and handle missing values using `dropna()`, `fillna()`, and conditional logic.
-- Remove duplicate rows using `dropDuplicates()`.
-- Write DataFrames to disk using CSV and Parquet formats.
-- Compare file sizes and explain why Parquet is preferred in big‑data systems.
-- Explain how cleaning and joining datasets fit into a typical ETL (Extract‑Transform‑Load) workflow.
-
----
-
-##  Prerequisites
-
-- You will work in **Google Colab**.
-- You should be able to initialize a **SparkSession** (from Lab 6).
-
-**Tip**: If Spark is not yet initialized in your Colab, run the same install steps from Lab 6 (Java 11, Spark 3.5.x, findspark) and then create the `SparkSession`.
+# CYT180 — Lab 7: Data Preprocessing for Machine Learning 
+**Weight:** 3% <br>
+**Work Type:** Individual <br>
+**Submission Format:** Screenshots
 
 ----
 
-## Section 1 — Simple DataFrames & Basic Joins
+## Introduction
+In this lab, you will perform data preprocessing and exploratory data analysis (EDA) on a structured dataset. Data preprocessing and exploratory data analysis (EDA) are the foundation of every machine‑learning pipeline, especially in cybersecurity analytics where data can be noisy, inconsistent, incomplete, or heavily imbalanced. Before building any model—whether for intrusion detection, anomaly detection, fraud scoring, or malware classification, you must thoroughly understand the raw data.<br>
+Preprocessing ensures the dataset is clean, reliable, and mathematically prepared for ML algorithms. EDA helps reveal hidden patterns, relationships, suspicious behaviors, and structural issues long before modeling begins.
+In cybersecurity, poorly preprocessed data can lead to:
 
-In this section, you will create two small DataFrames and learn how Spark performs different types of joins.
-Joins are one of the most important operations in data engineering because real-world datasets are almost never stored in a single table.
+- False positives in anomaly detection
+- Missed threats due to skewed or unscaled features
+- Misleading correlations
+- Overfitting from extreme outliers
+- Broken models due to missing values
+- Incorrect assumptions about normal vs malicious behavior
 
-### What is a Join?
+This lab guides you through the full preprocessing pipeline from loading data to scaling (data normalization), ensuring that you have a clean, trustworthy dataset ready for modeling in next lab.
 
-A **join** combines two DataFrames based on a shared column called the **join key**. Spark matches rows where the key has the same value in both tables.
+----
 
-For example:
+## Learning Objectives
+By the end of this lab you will be able to:
+- Load and inspect a dataset
+- Identify and understand missing data
+- Generate statistical summaries
+- Detect and remove outliers
+- Analyze correlations
+- Examine class distributions
+- Separate features and target variables
+- Apply feature scaling
 
-- `df_people` has a `person_id` column  
-- `df_salary` also has a `person_id` column  
+----
 
-If both tables contain a row with `person_id = 2`, Spark can **join** those rows so you get a single combined row containing all columns from both tables.
+## Data Preprocessing vs. Exploratory Data Analysis (EDA)
+Before we get started, it is important to understand the difference between Data Preprocessing and Exploratory Data Analysis (EDA). Although related, they serve different roles in the machine-learning workflow.
 
-Joins allow you to:
+### What Is Data Preprocessing?
 
-- Detect missing or unmatched records  
-- Build analytics tables from multiple sources  
+Data preprocessing involves preparing raw data so it is clean, consistent, and ready for modeling. It improves data quality, corrects structural issues, handle inconsistencies and noise and ensures that machine-learning algorithms can interpret the data.
 
-In PySpark, the join condition is written using the `on` parameter:
+#### Typical Preprocessing Tasks
+- Handling missing values  
+- Treating or removing outliers  
+- Fixing incorrect data types  
+- Encoding categorical variables  
+- Normalizing or standardizing values  
+- Removing duplicates  
+- Selecting or filtering features
 
-```python
-df_people.join(df_salary, on="person_id", how="left")
-```
+### What Is Exploratory Data Analysis (EDA)?
 
-The `how` parameter controls the join type (e.g., `"inner"`, `"left"`, `"right"`, `"anti"`).
+Exploratory Data Analysis (EDA) focuses on understanding the dataset and uncovering patterns. This process examines trends and distributions, identifies relationships between variables, detects anomalies or unexpected behavior, and helps guide preprocessing and modeling decisions.
 
-Understanding this basic concept will help you interpret the different join types introduced shortly.
+#### Typical EDA Tasks
+- Summary statistics (mean, median, quartiles)  
+- Distribution visualizations  
+- Correlation analysis  
+- Checking class balance  
+- Observing dataset structure and behavior  
 
-### Create Sample Data
-We will use two tables:
+### How They Work Together
 
-- `df_people` – information about individuals  
-- `df_salary` – salary records keyed by `person_id`
+A typical ML workflow alternates between the two:
 
-Let's create these tables.
-```python
-from pyspark.sql import SparkSession
-from pyspark.sql import functions as F
+1. Perform EDA → discover outliers
+2. Preprocess → remove or adjust outliers
+3. EDA again → verify the effect
+4. Preprocess → scale features
 
-spark = SparkSession.builder.getOrCreate()
+It’s an iterative loop, not a single pass.
 
-people = [
-    (1, "John", "Smith", "Canada"),
-    (2, "Jane", "Doe", "United States"),
-    (3, "Ravi", "Kumar", "India"),
-    (4, "Maria", "Silva", "Brazil")
-]
+----
 
-salaries = [
-    (1, 100000),
-    (2, 150000),
-    (5, 90000)   # no matching person_id in people
-]
-
-df_people = spark.createDataFrame(people, ["person_id","first","last","country"])
-df_salary = spark.createDataFrame(salaries, ["person_id","salary"])
-
-df_people.show()
-df_salary.show()
-```
-
-
-### Inner Join
-An **inner join** returns only the rows where the join key exists *in both* DataFrames.
-
-- If a `person_id` appears in both tables → it is included  
-- If it appears in only one → it is excluded
-
-Think of it as: **"Show me only matching rows."**
-
-In PySpark, you specify the join condition using the `on=` parameter in `DataFrame.join()`.
-
-The following query will show only the people who have a matching salary record. It excludes anyone without a salary and excludes any salary entries that don’t have a matching person.
+## Section 1 — Import Libraries & Load Dataset
+Before cleaning, analyzing, or modeling, confirm the dataset loads correctly, columns appear as expected, and no immediate formatting issues exist. This prevents downstream errors and saves time. Let's set up your Python environment and load the dataset to begin preprocessing and EDA.
 
 ```python
-df_inner = df_people.join(df_salary, on="person_id", how="inner")
-df_inner.show()
+import pandas as pd
+import numpy as np
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+df = pd.read_csv('diabetes.csv') #  loads the dataset
+df.head() # previews the first 5 rows to verify structure and column names.
 ```
 
-You can also provide a boolean expression:  
-```python
-df_inner = df_people.join(df_salary, df_people.person_id == df_salary.person_id, "inner")
-```
-In both cases, the **join key** is defined **with `on`** (either as a column name or a boolean expression). The `how` argument controls the join type: `"inner"` etc.
+### Explanation
 
+- **pandas (pd):** DataFrame operations (load CSVs, filter, group, summarize).
+- **numpy (np):** Numerical utilities (percentiles, array math, element-wise ops).
+- **scikit-learn scalers:**
+  - MinMaxScaler → normalize features to [0, 1].
+  - StandardScaler → standardize to mean = 0, std = 1.
+- **seaborn (sns) & matplotlib (plt):** Plotting and statistical visualization.
 
-###  Left Join
+----
 
-A **left join** keeps *all* rows from the left DataFrame (`df_people`), and adds matching data from the right DataFrame (`df_salary`) when available.
+## Section 2: Inspect Structure and Check Missing Values
 
-- If the left row has no match → Spark fills missing values with `null`
-- Nothing is removed from the left table
+Inspect the dataset’s structure and identify missing values before performing any transformations. Missing or inconsistent data can:
 
-Think of it as:  **"Keep everyone in the people table; add salary data if available."**
+- Distort statistical summaries
+- Break machine-learning models
+- Lead to incorrect conclusions
 
-Let's write a query to: "List everyone from the people table, and include salary if available. If a person has no salary record, show null for salary."
-
-```python
-df_left = df_people.join(df_salary, on="person_id", how="left")
-df_left.show()
-```
-
-
-###  Anti Join
-
-An **anti join** returns rows from one DataFrame where **no match exists** in the other.
-
-Specifically: a **right anti join** shows rows in the right table (`df_salary`)  that *do not* have a matching `person_id` in the left table (`df_people`)
-This is extremely useful for:
-
-- finding data quality issues  
-- detecting orphan records  
-- identifying missing relationships  
-
-Think of it as:  **"Show me the records that failed to match."**
-
-
-### Task 1 — Anti Join
-Perform a right anti join on df_salary to find rows in the salary table that do not have a matching person in `df_people`.
-Expected output includes `person_id = 5`.
-Add your code below and include a screenshot of the result.
+Identifying missing values early helps determine whether to remove rows, impute values, or engineer alternative solutions.
 
 ```python
-# TODO: Right anti join on df_salary to find salaries with no matching people
-# Your code here
+df.info() # number of rows and columns, data types, how many non-null entries each column contains
+df.isnull().sum()  # count of missing values per column
 ```
+----
+
+## Section 3: Statistical Summary and Outlier Visualization
+Before performing any cleaning or transformations, it is important to understand how each numeric feature (column) is distributed. This section provides two key tools for this:
+- **descriptive statistics:** which summarize the central tendency and spread of each feature
+- **boxplots:** which help visually detect potential outliers
+
+Descriptive statistics confirm whether feature values fall within expected ranges. Visualizing outliers helps avoid distortions during scaling or model training.
+
+
+```python
+summary = df.describe()  # count, mean, std, min, 25%, 50%, 75%, max
+print(summary)
+
+num_cols = df.select_dtypes(include=["number"]).columns
+fig, axs = plt.subplots(len(num_cols), 1, figsize=(7, 1.8 * len(num_cols)), constrained_layout=True)
+
+for ax, col in zip(axs, num_cols):
+    ax.boxplot(df[col], vert=False)
+    ax.set_ylabel(col)
+plt.show()
+```
+### Explanation
+
+- **df.describe()** provides a quick summary of each numeric column, including the mean, median (50%), quartiles, and spread.
+- Boxplots highlight the distribution shape, central value, and any values beyond the typical 1.5 × IQR boundary.
+- This step helps identify skew, inconsistent scales, and potential outliers before deciding whether to remove or transform them.
+
 ### Reflection Questions
-- In 2-4 sentences, explain why `person_id = 5` appears in the anti join result.
-
-### Screenshots to capture for Section 1
-- Inner join output
-- Left join output
-- **Task 1:** Right anti join code + output (must show `person_id = 5`)
-- Answer to the reflection question
+- Why might boxplots reveal outliers more effectively than numerical summaries alone?
+- Explain each box separately for Q1, Q3 and outliers. 
 
 ----
 
-## Section 2 — Load a Country Metadata Dataset
+## Section 4: Remove Outliers
 
-Real-world data pipelines almost always combine:
+Extreme values can distort statistical summaries, scaling procedures, and distance‑based algorithms. After identifying potential outliers in Step 3, the next step is to determine whether these values should be removed.  Removing or adjusting outliers helps maintain stable model training.
+In some domains, outliers may represent true rare behavior; in others, they may indicate data entry errors or noise. The decision should always be justified.
 
-1. **Fact data** – large tables with daily records (e.g., COVID cases per day)  
-2. **Dimension data** – small tables with descriptive attributes (e.g., population, region, categories)
-
-Spark joins allow us to merge these two types of data into a single enriched dataset.
-
-In this section, you will create a small lookup table containing population and continent information for the five countries used earlier.  
-You will later join this with COVID‑19 data to compute per‑capita metrics such as `cases_per_million`.
-
-### Create Population/Continent Data
+One common and transparent approach is the Interquartile Range (IQR) method. This method uses statistical boundaries to identify values that fall far outside the typical range of the data. Outlier removal can improve model stability, especially when extreme values distort the scale or distribution of a feature.
 
 ```python
-data_pop = [
-    ("Canada", 38000000, "North America"),
-    ("United States", 331000000, "North America"),
-    ("India", 1380000000, "Asia"),
-    ("Brazil", 212000000, "South America"),
-    ("Italy", 60000000, "Europe")
-]
+import numpy as np
 
-df_pop = spark.createDataFrame(data_pop, ["location","population","continent"])
-df_pop.show()
-```
-----
+# Example: Removing outliers from the "Insulin" column using the IQR method
+q1, q3 = np.percentile(df["Insulin"].dropna(), [25, 75])
+iqr = q3 - q1
 
-## Section 3 — Load COVID Dataset (Same Source as Lab 6)
+lower_bound = q1 - 1.5 * iqr
+upper_bound = q3 + 1.5 * iqr
 
-In this section, you will **download and load** the Our World in Data (OWID) COVID‑19 dataset into a Spark DataFrame and prepare it for joining by ensuring the `date` column has the proper Spark `date` type.  
-We will then **filter to five focus countries** so downstream tasks are fast and easy to inspect in Colab.
+clean_df = df[(df["Insulin"] >= lower_bound) & (df["Insulin"] <= upper_bound)]
 
-This is important becasue:
-- Large “fact” datasets like daily COVID records are common in analytics.
-- Proper data types (e.g., `date`) are important for ordering, window functions, and time‑based joins/aggregations.
-- Filtering to a small, focused subset is a common step to accelerate iteration in development.
-
-### Download & Load the CSV
-
-The cell below downloads the latest CSV into `/content` (Colab’s working directory) if it’s not already present, and loads it with `inferSchema=True` so Spark can detect numeric types.  
-We then cast the `date` string into a proper Spark `date` type so that time operations will work as expected.
-
-```python
-import requests, pathlib
-from pyspark.sql import functions as F
-
-url = "https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/owid-covid-data.csv"
-local_path = pathlib.Path("/content/owid-covid-data.csv")
-
-# Download the file if it doesn't exist yet
-if not local_path.exists():
-    r = requests.get(url, timeout=60)
-    r.raise_for_status()
-    local_path.write_bytes(r.content)
-
-# Load with header + schema inference
-df = spark.read.csv(str(local_path), header=True, inferSchema=True)
-
-# Convert 'date' to a proper Spark DateType
-df = df.withColumn("date", F.to_date("date"))
-
-print("Row count (may take a few seconds):", df.count())
-df.printSchema()
+print("Original rows:", len(df))
+print("Rows after removing Insulin outliers:", len(clean_df))
 ```
 
-### Filter to a Focus Subset
-
-We will keep the same five countries used elsewhere in the lab to keep outputs readable and consistent.
-
-```python
-countries = ["Canada", "United States", "India", "Brazil", "Italy"]
-df_covid = df.filter(F.col("location").isin(countries)) # Uses `.isin(...)` to filter rows for our five countries.
-
-# Filtered preview
-# Orders by `location, date` to make the output human-friendly.
-df_covid.select("location", "date", "new_cases", "new_deaths") \
-        .orderBy("date") \
-        .show(10, truncate=False)
-```
-
-### Task 2 — Verify Data Types 
-
-Print just the data types of the columns `location`, `date`, and `new_cases` from `df_covid` so you can confirm Spark’s understanding of your data.
-
-**Hint:** You can either `df_covid.dtypes` or `df_covid.printSchema()`, but your output should clearly indicate the types for those three columns only.
-The expected data type for  `location` should be a string type, `date` should be a date type (after casting), `new_cases` should be a numeric type (often `DoubleType`).
-```python
-# TODO: Show the data types for 'location', 'date', and 'new_cases' from df_covid
-# Your code here
-
-```
-### Task 3 — Show the Latest Records for Canada
-
-Display the **latest 10 records** for **Canada**, showing the columns:
-- `location`
-- `date`
-- `new_cases`
-- `new_deaths`
-
-Order by `date` **descending** so the most recent records appear first.
-
-```python
-# TODO: Filter to Canada and show latest 10 records ordered by date descending
-# Your code here
-```
-### Screenshots to capture for Section 3
-  - Filtered preview (`df_covid` sample, e.g., `.show(10, truncate=False)`)
-  - Task 2: Types for `location`, `date`, `new_cases`
-  - Task 3: Latest 10 records for **Canada** (ordered by date descending)
-
-----
-
-## Section 4 — Join COVID Data with Population Data
-
-In this section, you will learn how to join a large fact dataset (`df_covid`, containing daily COVID case counts) with a small dimension table (`df_pop`, containing population and continent metadata). This is one of the most common operations in data engineering and analytics. We will join the two DataFrames using the column `location`. Both tables contain this field, so Spark can match rows correctly.
-The purpose of this join is to enrich the COVID dataset with population information so we can compute **per-capita metrics** such as `cases_per_million`.
-
-### Left Join on `location`
-
-We perform a **left join** because we want to keep all rows from the COVID dataset, even if a country is missing from the population table (rare, but safe).
-We use DataFrame aliases and qualified columns to avoid ambiguous references (both datasets have a `location` and `population` column).
-
-```
-from pyspark.sql import functions as F
-
-c = df_covid.alias("c") # df_covid (has location, date, new_cases, population, ...)
-p = df_pop.alias("p") # df_pop (has location, population, continent)
-
-df_joined = (
-    c.join(p, on=F.col("c.location") == F.col("p.location"), how="left")
-)
-
-df_joined = df_joined.select(
-    F.col("c.location").alias("location"),
-    F.col("c.date").alias("date"),
-    F.col("c.new_cases").alias("new_cases"),
-    F.col("c.new_deaths").alias("new_deaths"),
-    F.col("p.population").alias("population"),    
-    F.col("p.continent").alias("continent")
-)
-
-df_joined.orderBy("date").show(10, truncate=False)
-```
-
-**What this join does:**
-- Keeps every row from `df_covid`  
-- Adds `population` and `continent` from `df_pop`  
-- If a country is missing in `df_pop`, Spark fills `population` and `continent` with `null`  
-- Maintains the same number of rows as the COVID subset  
-- Still sorted by `date` for readability
-
-### Task 4 — Compute `cases_per_million`
-
-In the datafrmae `df_joined`, create a new numeric column called `cases_per_million` using this formula:
-```
-cases_per_million = new_cases * 1,000,000 / population
-```
-This metric allows you to compare countries fairly despite differences in population size. You can use the function`withColumn` to create `cases_per_million`.
-
-After creating this column, **preview the results**:
-- Filter to `cases_per_million > 0` and `cases_per_million IS NOT NULL`. **Important:** If you simply sort by `date` and show the first 10 rows, you may see many zeros (early dates often have `new_cases = 0`). 
-- You may **either**:
-    - order by `date` (to see earliest non‑zero values), **or**
-    - order by `cases_per_million` descending (to see the largest values first).
-
-```python
-# TODO: Add cases_per_million column and preview non-zero values
-# Hint: Use F.lit(1_000_000) and a filter like (F.col("cases_per_million") > 0)
-
-# Your code here
-```
-
-### Screenshots to capture for Section 4
-  - Joined table preview with `population` and `continent` 
-  - Task 4: `cases_per_million` code + preview including `cases_per_million` 
-
-----
-
-## Section 5 — Data Cleaning (Missing Values, Deduplication, Sanity Checks)
-
-In this section, you will **inspect**, **clean**, and **verify** the joined dataset from Section 4.  
-You will:
-- Identify missing values (e.g., `population`, `new_cases`)
-- Drop rows that cannot support per‑capita metrics (missing `population`)
-- Fill select numeric columns with sensible defaults for this lab (`new_cases`, `new_deaths` → `0`)
-- Remove **duplicate** rows using a composite key (`location`, `date`)
-- Verify the effect of cleaning by comparing **row counts** before and after
-
- **Context:** In production, “filling with zero” is not universally correct. We do it here for instructional simplicity and to stabilize downstream calculations. Always choose imputation strategies that match your data semantics.
-
-### 1. Inspect Missingness
-
-Use boolean expressions cast to integers to **count** nulls in key columns. This pattern is scalable and fast in Spark.
-
-```python
-from pyspark.sql import functions as F
-
-df_joined.select(
-    F.sum(F.col("population").isNull().cast("int")).alias("missing_population"),
-    F.sum(F.col("new_cases").isNull().cast("int")).alias("missing_new_cases"),
-    F.sum(F.col("new_deaths").isNull().cast("int")).alias("missing_new_deaths")
-).show()
-```
-
-**Notes:**
-- `population` should generally be present for the five countries we added; any nulls indicate a join mismatch.
-- `new_cases` / `new_deaths` may have nulls due to reporting gaps.
-
-
-### 2. Keep a Copy of the Pre‑Clean State
-
-We will use this to compare row counts **before vs after** cleaning.
-
-```python
-df_before_clean = df_joined
-count_before_clean = df_joined.count()
-print("Rows BEFORE cleaning:", count_before_clean)
-```
-
-
-### 3. Perform Cleaning Steps 
-
-- **Drop** rows missing `population` (we cannot compute per‑capita metrics without it).
-- **Fill** selected numeric columns (`new_cases`, `new_deaths`) with `0` for this exercise.
-- **Deduplicate** by the natural time‑series key: (`location`, `date`).
-
-```python
-# 3.1 Drop rows with missing population (per-capita metrics require a denominator)
-df_clean = df_joined.dropna(subset=["population"])
-
-# 3.2 Fill selected numeric nulls with zeros for stability in simple metrics
-df_clean = df_clean.fillna({"new_cases": 0, "new_deaths": 0})
-
-# 3.3 Remove duplicate records by (location, date)
-df_clean = df_clean.dropDuplicates(["location", "date"])
-
-# Optional preview
-df_clean.orderBy("date").show(10, truncate=False)
-```
-
-### Task 5 — Compare Row Counts (Before vs After)
-
-Print the row counts **before** and **after** cleaning. Verify that:
-- The **after** count is **less than or equal to** the **before** count
-- Differences are explainable by dropped `population` nulls and duplicate rows
-
-```python
-# TODO: Show counts before and after cleaning
-# Your code here
-
-# Optional: show how many were dropped
-```
-
-### 4. Sanity Check: Are There Any Remaining Nulls? (Run)
-
-This helps confirm the dataset is in a usable state for downstream metrics.
-
-```python
-df_clean.select(
-    F.sum(F.col("population").isNull().cast("int")).alias("remaining_null_population"),
-    F.sum(F.col("new_cases").isNull().cast("int")).alias("remaining_null_new_cases"),
-    F.sum(F.col("new_deaths").isNull().cast("int")).alias("remaining_null_new_deaths")
-).show()
-```
-
-**What you want to see:**
-- `remaining_null_population` should be `0` (we dropped them).
-- `remaining_null_new_cases` / `remaining_null_new_deaths` should be `0` if your fill worked.
-
-
-### 5. Guard the Per‑Capita Metric
-
-If you created `cases_per_million` in Section 4 **before** cleaning, recompute it now to ensure correctness after the cleaning steps.
-
-```python
-df_clean = df_clean.withColumn(
-    "cases_per_million",
-    (F.col("new_cases") * F.lit(1_000_000)) / F.col("population")
-)
-
-df_clean.select.orderBy("date").show(10, truncate=False)
-```
-
-### Reflection Questions (Write short answers beneath your screenshots)
-1. Why is **dropping duplicates** by (`location`, `date`) important in time‑series pipelines?  
-2. When is it **not** appropriate to fill missing values with zero? Give one example.  
-3. Why must rows with missing `population` be removed (or fixed) before computing per‑capita metrics?
-
-### Screenshots to capture for Section 5
-  - Row counts **before vs after** cleaning (and difference)
-  - Remaining nulls check after cleaning
-
----
-
-## Section 6 — Spark SQL Joins and Aggregations
-
-In this section, you will practice joining and aggregating using **Spark SQL**.  
-You already completed joins with the **DataFrame API**; SQL gives you a declarative way to write the same logic, which many analysts and data engineers prefer for multi-table queries.
-
-In this section, we will:
-- Create temporary views for small demo tables (`people`, `salary`) and the cleaned COVID table.
-- Run a **LEFT JOIN** in SQL (people ↔ salary).
-- Write an **aggregation** in SQL over the cleaned COVID data.
-- (Provided) Solution queries you can run directly.
-
-### 1. Create Temp Views
-
-We expose existing DataFrames to Spark SQL by creating **temporary views**.  
-You can then query them with `spark.sql("...")`.
-
-```python
-# Make sure these DataFrames exist from prior sections:
-# df_people, df_salary, df_clean
-
-df_people.createOrReplaceTempView("people")
-df_salary.createOrReplaceTempView("salary")
-df_clean.createOrReplaceTempView("covid_clean")
-```
-
-### 2. Example: LEFT JOIN in SQL
-
-**Problem statement:** List everyone from the `people` table, and include their `salary` if it exists.  
-If no salary record exists, the `salary` column should be `NULL`.
-
-```python
-spark.sql("""
-SELECT
-  p.person_id,
-  p.first,
-  p.last,
-  p.country,
-  s.salary
-FROM people p
-LEFT JOIN salary s
-  ON p.person_id = s.person_id
-ORDER BY s.salary DESC
-""").show()
-```
-
-**You should observe that:**
-- All rows from `people` appear.
-- If a person has no salary, the `salary` column is `NULL`.
-- The order puts the highest salaries first; `NULL` salaries are shown last.
-
-### 3. Example: SQL Aggregation over `covid_clean`
-
-**Problem statement:** Write a **single SQL query** over `covid_clean` that returns, for each `location`:
-
-- `location`
-- `population`
-- `continent`
-- **average** daily `new_cases` as `avg_new_cases`
-- **maximum** daily `new_cases` as `max_new_cases`
-
-```python
-spark.sql("""
-SELECT
-  location,
-  population,
-  continent,
-  AVG(new_cases) AS avg_new_cases,
-  MAX(new_cases) AS max_new_cases
-FROM covid_clean
-GROUP BY location, population, continent
-ORDER BY avg_new_cases DESC
-LIMIT 10
-""").show(truncate=False)
-```
-
-**Explanation:**
-- `AVG(new_cases)` and `MAX(new_cases)` are computed per `location`.
-- We include `population` and `continent` in the `GROUP BY` to keep the result uniquely defined and to prevent aggregate errors.
-- The `ORDER BY` shows countries with higher average new cases first.
-- `LIMIT 10` keeps the output concise for screenshots.
-
-### 4. Join + Aggregate in one SQL query
-
-**Problem statement:**  From the **raw** COVID subset (pre-clean, available as `df_covid` → temp view `covid_raw`), join to `df_pop` (temp view `pop`) and compute average cases per million **in SQL**.  This mirrors the DataFrame logic you did earlier.
-
-```python
-# df_covid.createOrReplaceTempView("covid_raw")
-# df_pop.createOrReplaceTempView("pop")
-```
-After creating the views, we will write the SQL query to join and aggregate.
-
-```python
-spark.sql("""
-SELECT
-  c.location,
-  p.continent,
-  p.population,
-  AVG(c.new_cases * 1000000.0 / p.population) AS avg_cases_per_million
-FROM covid_raw c
-LEFT JOIN pop p
-  ON c.location = p.location
-WHERE p.population IS NOT NULL
-GROUP BY c.location, p.continent, p.population
-ORDER BY avg_cases_per_million DESC
-LIMIT 10
-""").show(truncate=False)
-```
+### Explanation
+
+- The first quartile `(Q1)` and third quartile `(Q3)` define the middle 50 percent of the data.
+- The Interquartile Range `(IQR)` is computed as `Q3 minus Q1`.
+- Any value below `Q1 − 1.5 × IQR` or above `Q3 + 1.5 × IQR` is considered a potential outlier.
+- This method uses a consistent, reproducible rule and is widely used for skewed or non‑normal data.
+
+Clinical datasets (such as this diabetes dataset) may contain zeros or unusually high values that indicate missing or irregular entries.
+In cybersecurity datasets, some outliers may represent meaningful anomalies rather than noise. These should be evaluated carefully before removal.
 
 ### Reflection Questions
 
-1. When might **SQL** be more readable or maintainable than the DataFrame API for joins and aggregations?  
-2. Why should you include **dimension columns** like `population` and `continent` in the `GROUP BY` along with `location`?  
-
-### Screenshot Requirements for Section 6
-
-Include clear screenshots of:
-
-1. The **LEFT JOIN** SQL query and output (`people` ↔ `salary`).  
-2. Your **aggregation** SQL query over `covid_clean` and its output (with `avg_new_cases`, `max_new_cases`).  
-3. **Join + Aggregate** in one SQL query
-4. Answers to the reflection questions 
+- Why is 1.5 × IQR used as a standard boundary rather than 1 × IQR or 2 × IQR?
+- Should all outliers be removed automatically, or should outlier handling depend on the meaning of the data?
+- How might removing outliers affect the distribution of a feature?
 
 ----
 
-## Section 7 — Writing Data: CSV vs Parquet (and Comparing Sizes)
-
-In this section, you will **persist** your cleaned dataset to disk in two common formats and compare their storage sizes.  
-This mirrors a standard step in data engineering pipelines where results are written to **data lakes** or **lakehouses** for downstream use.
-
-**Why this matters:**
-- **CSV** is human-readable but large and schema-less.
-- **Parquet** is a **columnar**, **compressed**, and **schema-aware** format optimized for analytics and Spark.
-- Understanding when and why to prefer Parquet is table stakes for Big Data work.
-
-### 1. Write Cleaned Data to CSV and Parquet
-
-We will write the `df_clean` DataFrame (created in Section 5) to two separate directories in Colab’s `/content` workspace.
+## Section 5: Correlation Analysis
+Correlation analysis helps determine how strongly different features relate to one another. Before building any machine‑learning model, it is important to understand which variables move together, which are unrelated, and which may be redundant. This step provides a structured way to evaluate feature relationships based on numerical evidence. For many models, especially linear models and distance‑based algorithms, correlation patterns directly influence performance and interpretability.
 
 ```python
-# Write CSV (directory with multiple part files)
-df_clean.write.mode("overwrite").csv("/content/lab7_output_csv")
+import seaborn as sns
+import matplotlib.pyplot as plt
 
-# Write Parquet (directory with multiple part files and metadata)
-df_clean.write.mode("overwrite").parquet("/content/lab7_output_parquet")
+# Compute correlation matrix for numeric columns
+corr = df.corr(numeric_only=True)
+
+# Plot heatmap
+plt.figure(figsize=(10, 8))
+sns.heatmap(corr, annot=True, cmap="coolwarm", fmt=".2f")
+plt.title("Correlation Matrix")
+plt.show()
 ```
+### Explanation
 
-**Notes:**
-- Spark writes **directories**, not single files, because data may be partitioned across tasks.
-- `mode("overwrite")` ensures reruns replace older outputs.
+- **df.corr()** computes pairwise correlation coefficients between numeric features.
+- Correlation values range from:
+  - +1.0 (strong positive relationship)
+  - 0 (no linear relationship)
+  - -1.0 (strong negative relationship)
+- The heatmap color‑codes these relationships, making it easier to spot strong associations.
 
+### Why Correlation Analysis is Required
+- **Identifying Redundant Features:** highly correlated features often provide overlapping information. Including both in a model can add noise or reduce efficiency without improving accuracy. Feature selection often starts with correlation inspection.
+- **Understanding Feature Influence on the Target:** a feature strongly correlated with the target variable is a good candidate for inclusion in a predictive model. Conversely, features with almost no correlation may be less useful or require transformation.
+- **Detecting Multicollinearity Before Modeling:** in models such as logistic regression, linear regression, or any model relying on coefficients, multicollinearity (when predictors are strongly correlated with each other) weakens model reliability. Correlation analysis helps you detect and address this early.
+- **Supporting Feature Engineering:** correlations can reveal hidden relationships that guide decisions such as:
+   - combining features
+   - removing irrelevant fields
+   - applying transformations
+- **Providing Insight Into Data Structure:** before doing any modeling, analysts should understand how their variables interact. Correlation analysis provides a quick, evidence‑based overview of the dataset’s structure.
 
-### 2. Inspect Directory Structure
+### Example: Identifying Redundant Features
 
-The `ls -la` shell command helps you see what Spark wrote in each folder.
+Suppose the correlation matrix shows the following relationships:
+
+- Glucose and Insulin have a correlation of **0.82**
+- BMI and SkinThickness have a correlation of **0.78**
+- Age and Pregnancies have a correlation of **0.20**
+
+From this, we can reason:
+
+- **Glucose and Insulin (~0.82 correlation)**  
+   These two features move strongly together. Including both may add little additional information to the model.  
+   A common approach:
+   - Keep the feature with fewer missing values.
+   - Or keep the one that shows a stronger correlation with the target (Outcome).
+
+- **BMI and SkinThickness (~0.78 correlation)**  
+   These are moderately high and could introduce redundancy.  
+   You might:
+   - Retain both if a nonlinear model (e.g., Random Forest) is used.
+   - Drop one if using a model sensitive to multicollinearity (e.g., Logistic Regression).
+
+- **Age and Pregnancies (~0.20 correlation)**  
+   Low correlation means no redundancy. Both features capture different information and should be kept.
+
+### Reflection Questions
+
+- What is the actual correlation index of Glucose and Insulin?
+- What is the actual correlation index of BMI and SkinThickness?
+- What is the actual correlation index of Age and Pregnancies
+- What issues might arise if two features have a correlation greater than 0.9?
+- How can correlation analysis inform feature selection?
+
+----
+## Section 6: Visualize Target Variable Distribution
+Before training any machine-learning model, it is important to understand how balanced or imbalanced the target variable is. Class distribution affects model performance, fairness, and evaluation metrics. Many algorithms assume roughly balance classes, and if one class is significantly underrepresented, the model may learn to favor the majority class. This section visualizes the frequency of each class in the dataset to inform decisions about resampling or using class‑balanced algorithms later.
 
 ```python
-print("CSV directory listing:")
-!ls -la /content/lab7_output_csv | head -n 20
+import matplotlib.pyplot as plt
 
-print("\nParquet directory listing:")
-!ls -la /content/lab7_output_parquet | head -n 20
+# Count values in the target column
+counts = df["Outcome"].value_counts()
+
+# Pie chart representation
+plt.figure(figsize=(6, 6))
+plt.pie(
+    counts,
+    labels=counts.index,
+    autopct="%.0f%%",
+    shadow=True
+)
+plt.title("Outcome Distribution")
+plt.show()
 ```
+### Explanation
 
-**Notes:**
-- CSV output folder will contain multiple `part-...` files (text files with CSV rows).
-- Parquet output folder will contain `part-...` **binary** files plus metadata.
+- `value_counts()` counts how many samples belong to each class (0 vs. 1 in the diabetes dataset).
+- A pie chart visually shows the proportion of each category.
+- This visualization makes it easy to determine whether one class dominates the dataset.
+  
+### How does Visualization Help
 
-### 3. Compare Sizes with `du -sh`
+- **Understanding Class Imbalance:** If one class greatly outweighs the other, the model may default to predicting the majority class. If 80% of samples are class 0 and 20% are class 1, a model that always predicts 0 will appear to be “80% accurate” while completely failing to detect class 1.
+- **Planning for Resampling Techniques**
+  - Oversampling (e.g., SMOTE)
+  - Undersampling
+  - Class-weighted algorithms
+- **Identifying Evaluation Challenges:** With imbalance, metrics like precision, recall, F1-score, and ROC-AUC become more meaningful than accuracy. We will look at these in the next lab.
+- **Ensuring Fairness and Reliability:** In cybersecurity, minority classes often represent the most critical events (e.g., intrusion attempts). Even if rare, missing them would have serious consequences.
 
-We’ll compare the total sizes of the CSV and Parquet directories.  
-`du -sh` prints **human-readable** sizes (e.g., KB, MB).
+A roughly even distribution suggests the dataset is balanced and simpler to model. A skewed distribution (e.g., 90/10 or 70/30) indicates the need for special handling. It is important to always check both percentages and absolute counts.
+
+In this lab, we only visualize class imbalance. We do not apply balancing techniques yet because oversampling or undersampling must be performed after train–test splitting to avoid data leakage. Class balancing will be handled in next Lab during model training.
+
+### Reflection Questions
+- Based on the pie chart, what percentage of the samples belong to class 0 (No Diabetes) and class 1 (Diabetes)?  
+- Why are we only visualizing class imbalance in this lab and not applying balancing techniques yet?
+- In cybersecurity datasets, why are low-frequency (minority) events—such as intrusion attempts or failed login spikes—often the most important to detect?
+
+----
+
+## Section 7: Separate Features and Target
+Before training a machine-learning model, it is necessary to split the dataset into two components:  
+- **X**: all predictor variables (the inputs)  
+- **y**: the target variable (the output we want to predict)  
+
+This separation ensures that models learn patterns only from the predictors and that the target variable is not accidentally included in the training data. Including the target variable inside X would make the model “learn” using information it should not have access to, leading to unrealistically high accuracy. Including the target variable inside X would make the model “learn” using information it should not have access to, leading to unrealistically high accuracy. Almost all machine‑learning workflows use this structure.
+
 
 ```python
-print("CSV size:")
-!du -sh /content/lab7_output_csv
+# Separate predictors and target
+X = df.drop(columns=["Outcome"])
+y = df["Outcome"]
 
-print("\nParquet size:")
-!du -sh /content/lab7_output_parquet
+print("Shape of X:", X.shape)
+print("Shape of y:", y.shape)
 ```
 
-**Notes:**
-- Parquet is typically **smaller** due to compression and columnar encoding.
-- Your exact numbers will vary by runtime and filtered subset.
+### Explanation
 
-### Task 6 — Read Back the Parquet and Confirm Schema
+- X contains all input features except the target.
+- y contains only the target column (Outcome), where:
+  - 0 = No Diabetes
+  - 1 = Diabetes
+- This separation is required for model training, scaling, and evaluation steps.
+- Using .drop() ensures no accidental inclusion of the target in the feature set.
 
-Read the Parquet output back into a new DataFrame and print its **schema** and a small **preview**.  
-This verifies that writing and reading Parquet preserves column types and data (including the `cases_per_million` if present in `df_clean`).
+### Reflection Questions
+- What problems might occur if the target column is accidentally included in X?
+- In a cybersecurity scenario, what could X and y represent?
 
-**Starter:**
+----
+
+## Section 8: Feature Scaling (Normalization and Standardization)
+Machine-learning algorithms often assume that all features operate on comparable numerical scales. When features vary widely in range, models that rely on distance, gradient calculations, or optimization can behave unpredictably. Feature scaling transforms all predictors into a consistent range or distribution, improving training stability and model performance. In this step, you will apply two common scaling techniques: Min‑Max Normalization and Standardization.
+
 ```python
-# TODO: Read back Parquet, print schema, and show sample rows
-# Your code here
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
+
+# 1) Min-Max Normalization (scales features to range 0–1)
+minmax_scaler = MinMaxScaler()
+X_normalized = minmax_scaler.fit_transform(X)
+
+# 2) Standardization (mean = 0, standard deviation = 1)
+standard_scaler = StandardScaler()
+X_standardized = standard_scaler.fit_transform(X)
+
+print("Shape of normalized X:", X_normalized.shape)
+print("Shape of standardized X:", X_standardized.shape)
 ```
 
-### Reflection Questions (write your answers below your screenshots)
+### Explanation
 
-1. Which output format had the **smaller** directory size, and **why**?  
-2. Name two reasons Parquet is preferred in analytic workloads compared to CSV.  
+- Min‑Max Normalization
+  - Rescales values to a fixed range (typically 0–1).
+  - Useful when the feature distribution is not assumed to be normal.
+  - Sensitive to outliers, which is why outlier removal (Step 4) is done beforehand.
+- Standardization (Z‑Score Scaling)
+  - Centers data around mean 0 with standard deviation 1.
+  - Preferred for algorithms that assume normally distributed data or use gradient‑based optimization.
+ 
 
+Without scaling, a feature like “Glucose” (0–200) can overpower a feature like “Pregnancies” (0–15), skewing model behavior. Imagine two features:
+- Glucose values range from 50 to 200
+- SkinThickness values range from 5 to 50
+If unscaled, a model may treat changes in Glucose as far more significant than changes in SkinThickness simply because the raw numbers are larger. After scaling, both features contribute proportionally to the model.
+Many algorithms expect scaled input for optimal performance, including:
+  - Logistic Regression
+  - k‑Nearest Neighbors
+  - Neural Networks
+  - PCA
+  
 
-### Screenshot Requirements for Section 7
+### Reflection Questions
+- Why must scaling be applied after separating X and y?
 
-Include clear screenshots of:
-- The **write** operations to CSV and Parquet (the code cells).
-- The **directory listings** for both outputs.
-- The **`du -sh`** size comparison for CSV vs Parquet.
-- Task 6 that reads Parquet back and shows **schema + sample rows**.  
+----
 
----
 ## Conclusion
 
-In this lab, you extended your Spark skills beyond basic DataFrame operations by working through a realistic mini–data‑engineering workflow. You learned how to enrich a large fact dataset (daily COVID‑19 records) with a smaller dimension table (country population metadata), clean and standardize the resulting data, compute meaningful per‑capita metrics, and write the final dataset in multiple formats. You also practiced joining data using both the DataFrame API and Spark SQL, reinforcing how Spark can operate in both programmatic and declarative styles.
+In this lab, you completed the full preprocessing and exploratory data analysis workflow required to prepare a structured dataset for machine learning. You examined the dataset’s structure, identified missing values, explored statistical summaries, visualized outliers, applied the IQR method, analyzed feature correlations, inspected class balance, separated predictors from the target variable, and scaled the features.
 
-You now have hands‑on experience with:
-- Joining DataFrames using `on` keys
-- Handling missing values strategically
-- Removing duplicates in time‑series data
-- Creating per‑capita and derived metrics
-- Executing SQL joins and aggregations
-- Writing data to CSV and Parquet, and comparing storage behavior
-- Reading Parquet back into Spark and validating schema integrity
+These steps ensure the data is clean, consistent, and ready for modeling. By the end of this lab, you should understand not only how to perform these tasks, but also why each step matters in building reliable and interpretable machine‑learning models. This foundation is essential before moving into model training, evaluation, and prediction.
 
-These steps reflect the core of a modern **ETL pipeline**:
-1. **Extract** data from source systems  
-2. **Transform** it through cleaning, validation, and enrichment  
-3. **Load** it into optimized storage formats for downstream analytics  
+Your dataset is now fully preprocessed and ready for next **Lab 8**, where you will perform:
 
-By the end of this lab, you should feel comfortable navigating Spark across its most commonly used components—DataFrames, SQL, joins, cleaning operations, and data serialization. These skills will support you in more advanced data engineering, big‑data analytics, and cloud‑based processing workflows in future labs and real‑world projects.
+- Train–test splitting  
+- Model selection  
+- Model training  
+- Model evaluation and reporting  
+- Interpretation of performance metrics  
 
----
+Having clean and well‑prepared data will make the modeling process in Lab 8 far more effective and meaningful.
 
+     
+----
 
-## Submission Guidelines
-
-This final section defines **exactly what you must submit**, how to **prove ownership** of your work in Colab, and what **quality standards** will be used for grading. Follow it carefully to avoid deductions.
-
-- **Required screenshots:**
-    - Every section lists what screenshots to include. Please add them in correct order under proper headings.
-    - Make sure your final PDF report is well organized
-
-- **Ownership Proof (Show Date/Time + Username in Colab)**
-    - Add a small cell at the **top of your notebook** that prints your **username** and the **current timestamp** from the runtime.
-
-    ```python
-    import getpass, datetime
-    print("CYT180 Lab 7 Owner:", getpass.getuser())
-    print("Timestamp:", datetime.datetime.now().isoformat())
-    ```
-
-Take a screenshot **showing this cell’s output** and include it with your submission.  
-If your environment returns a generic user (e.g., `root` in Colab), also type your full name/username in a Markdown cell and include that in the same screenshot.
-
-- **Presentation & Professionalism Requirements**
-    - **Readability:** Use `.show(10, truncate=False)` for samples so columns are not cut off.
-    - **Zoom:** Ensure text is **large enough** to read in the screenshot (no tiny text).
-    - **Relevance:** Keep only relevant output; avoid long walls of text/logs.
-    - **Organization:** Submit in the requested order. Clearly label each section in your document.
-    - **Completeness:** Missing any required screenshot or answer may incur deduction up to 100%.
+## Submission Instructions
+- For each section, capture screenshots showing the meaningful output and the answers to review questions.
+- Organize your work in sections.
+- Include captions for each screenshot.
+- Capture the screenshot at proper resolution, too small resolution and capturing unnecessarily long output will lead to marks reduction of upto 50%.
+- Make sure your works looks professional!
+- Include the name and current date time in each screenshot.
