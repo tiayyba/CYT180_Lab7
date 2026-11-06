@@ -1,8 +1,8 @@
 # CYT180 — Lab 7: Preparing Security Data for Machine Learning
 
-**Weight:** 3%
-**Work Type:** Individual
-**Submission Format:** Your Colab notebook printed to PDF (see Submission Guidelines)
+**Weight:** 3%<br>
+**Work Type:** Individual<br>
+**Submission Format:** Your Colab notebook printed to PDF (see Submission Guidelines)<br>
 
 ---
 
