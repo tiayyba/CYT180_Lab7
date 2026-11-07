@@ -1,6 +1,6 @@
 # CYT180 — Lab 7: Preparing Security Data for Machine Learning
 
-**Weight:** 3%<br>
+**Weight:** 3% <br>
 **Work Type:** Individual<br>
 **Submission Format:** Your Colab notebook printed to PDF (see Submission Guidelines)<br>
 
@@ -19,6 +19,8 @@ Poorly prepared data leads to real problems in security analytics:
 - Wrong assumptions about what normal and malicious behaviour look like
 
 You will work through the full preparation workflow, from loading the data to scaling the features. At the end, you will have a clean dataset that is ready for model training in Lab 8.
+
+You will use two kinds of work that go hand in hand. **Exploratory data analysis (EDA)** helps you understand the data and find its problems, and **preprocessing** fixes those problems. In practice you move back and forth between the two: for example, you look at the data and find outliers, decide what to do with them, and then look again.
 
 You will mostly run provided code and observe the results, and you will complete one small task in most sections.
 
@@ -41,28 +43,9 @@ By the end of this lab, you will be able to:
 
 ---
 
-## Data Preprocessing vs. Exploratory Data Analysis (EDA)
-
-These two activities are related, but they have different jobs.
-
-**Data preprocessing** prepares raw data so it is clean, consistent, and ready for modeling. Typical tasks are handling missing values, removing duplicates, treating outliers, fixing data types, encoding categorical values, and scaling features.
-
-**Exploratory Data Analysis (EDA)** is about understanding the data and finding patterns. Typical tasks are summary statistics, distribution plots, correlation analysis, and checking class balance.
-
-In practice, you move back and forth between the two:
-
-1. EDA: you discover outliers
-2. Preprocessing: you decide what to do with them
-3. EDA again: you check the effect
-4. Preprocessing: you scale the features
-
-It is a loop, not a single pass.
-
----
-
 ## About the Data
 
-The file `network_connections.csv` contains **network connection records** from a simulated company network. Each row is **one connection** to a company server, summarized the way a network monitoring tool (such as Zeek or a firewall) would record it. The data was generated for this course, so it is safe to share and every student can get a different sample of it.
+The file `network_connections.csv` contains **network connection records** from a simulated company network. Each row is **one connection** to a company server, summarized the way a network monitoring tool (such as Zeek or a firewall) would record it.
 
 About 10% of the connections are **attacks** of three kinds:
 
@@ -303,7 +286,7 @@ print("Rows flagged as outliers:", len(outliers))
 
 - `np.percentile(..., [25, 75])` returns Q1 and Q3.
 - `is_outlier` is True for every row whose value is outside the two bounds. The `|` symbol means "or".
-- `outliers` holds only the flagged rows.
+- `outliers` is a new DataFrame with the same columns as `df_clean`, but only the rows that were flagged as outliers.
 
 ### Task 3 — Outliers in Your Column (1 mark)
 
