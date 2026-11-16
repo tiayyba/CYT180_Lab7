@@ -151,7 +151,7 @@ print("Rows in my sample:   ", len(df))
 df.head()
 ```
 
-**Code Explanation**
+**Explanation**
 
 - `sample(n=5000, random_state=...)` picks 5,000 random rows. The `random_state` is a seed: the same seed always gives the same rows, so if you run the cell again you get the same sample.
 
