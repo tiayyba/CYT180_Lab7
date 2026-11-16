@@ -151,7 +151,7 @@ print("Rows in my sample:   ", len(df))
 df.head()
 ```
 
-**Explanation**
+**Code Explanation**
 
 - `sample(n=5000, random_state=...)` picks 5,000 random rows. The `random_state` is a seed: the same seed always gives the same rows, so if you run the cell again you get the same sample.
 
@@ -166,9 +166,7 @@ df.info()                 # rows, columns, data types, and non-null counts
 print(df.isnull().sum())  # number of missing values in each column
 ```
 
-**Explanation**
-
-- `duration_sec` and `bytes_received` are stored as `float64`. Pandas uses decimals for any column with missing values, because an empty value (`NaN`) is a special decimal value.
+Note that in the output, `duration_sec` and `bytes_received` are stored as `float64`. Pandas uses decimals for any column with missing values, because an empty value (`NaN`) is a special decimal value.
 
 ### Task 1 — Missing Values and Duplicates (1 mark)
 
