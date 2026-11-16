@@ -20,7 +20,7 @@ Poorly prepared data leads to real problems in security analytics:
 
 You will work through the full preparation workflow, from loading the data to scaling the features. At the end, you will have a clean dataset that is ready for model training in Lab 8.
 
-You will use two kinds of work that go hand in hand. **Exploratory data analysis (EDA)** helps you understand the data and find its problems, and **preprocessing** fixes those problems. In practice you move back and forth between the two: for example, you look at the data and find outliers, decide what to do with them, and then look again.
+You will work on two ideas that go hand in hand. **Exploratory data analysis (EDA)** helps you understand the data and find its problems, and **preprocessing** fixes those problems. In practice you move back and forth between the two: for example, you look at the data and find outliers, decide what to do with them, and then look again.
 
 You will mostly run provided code and observe the results, and you will complete one small task in most sections.
 
