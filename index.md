@@ -72,7 +72,7 @@ The data has the same problems that real logs have: some values are missing, som
 
 ## Prerequisites
 
-- You will work in **Google Colab**. Pandas, NumPy, scikit-learn, seaborn, and matplotlib are already installed there.
+- You can work in **Google Colab** or **Jupyter Lab**. Pandas, NumPy, scikit-learn, seaborn, and matplotlib are already installed in Google Colab.
 - Download `network_connections.csv` from Blackboard.
 - In Colab, click the **folder icon** on the left, then the **upload** button, and choose the file. It will be saved as `/content/network_connections.csv`.
 
@@ -153,9 +153,7 @@ df.head()
 
 **Explanation**
 
-- `pd.read_csv()` reads the CSV file into a DataFrame.
 - `sample(n=5000, random_state=...)` picks 5,000 random rows. The `random_state` is a seed: the same seed always gives the same rows, so if you run the cell again you get the same sample.
-- `head()` shows the first 5 rows so you can check the column names and values.
 
 ---
 
@@ -170,8 +168,6 @@ print(df.isnull().sum())  # number of missing values in each column
 
 **Explanation**
 
-- `info()` lists each column with its data type and how many values are **not** missing. If a column has fewer non-null values than the number of rows, it has missing values.
-- `isnull().sum()` counts the missing values in each column.
 - `duration_sec` and `bytes_received` are stored as `float64`. Pandas uses decimals for any column with missing values, because an empty value (`NaN`) is a special decimal value.
 
 ### Task 1 — Missing Values and Duplicates (1 mark)
